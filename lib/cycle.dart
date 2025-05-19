@@ -12,7 +12,7 @@ class LifeCycle extends StatefulWidget {
   }
 }
 
-class _LifeCycleExampleState extends State<LifeCycle> {
+class _LifeCycleExampleState extends State<LifeCycle> with WidgetsBindingObserver {
   int counter = 0;
   int _selectedIndex = 0;
 
@@ -20,6 +20,7 @@ class _LifeCycleExampleState extends State<LifeCycle> {
   void initState() {
     super.initState();
     print('initState called');
+    WidgetsBinding.instance.addObserver(this);
     counter = 1;
   }
 
@@ -34,6 +35,26 @@ class _LifeCycleExampleState extends State<LifeCycle> {
     super.didUpdateWidget(oldWidget);
     print('didUpdateWidget called');
   }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.resumed:
+        print('app resumed');
+        break;
+      case AppLifecycleState.paused:
+        print('app paused');
+        break;
+      case AppLifecycleState.inactive:
+        print('app inactive');
+        break;
+      case AppLifecycleState.detached:
+      default:
+        print('app detached');
+        break;
+    }
+  }
+
 
   void _onItemTapped(int index) {
     setState(() {
@@ -51,31 +72,37 @@ class _LifeCycleExampleState extends State<LifeCycle> {
         title: Text(widget.title),
         backgroundColor: Colors.blueGrey,
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text('Counter value is: $counter'),
-            SizedBox(height: 20),
-            Container(
-              width: 200,
-              height: 200,
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey),
+      body: Card(
+        margin: EdgeInsets.all(60),
+        elevation: 410,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+        color: Colors.grey,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text('Counter value is: $counter'),
+              SizedBox(height: 20),
+              Container(
+                width: 200,
+                height: 200,
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                ),
+                child: Image.asset("assets/images/fast food.jpg", fit: BoxFit.cover,),
               ),
-              child: Image.asset("assets/images/fast food.jpg", fit: BoxFit.cover,),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  counter++;
-                  print('setState called');
-                });
-              },
-              child: Text('Click here'),
-            ),
-          ],
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    counter++;
+                    print('setState called');
+                  });
+                },
+                child: Text('Click here'),
+              ),
+            ],
+          ),
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -86,12 +113,10 @@ class _LifeCycleExampleState extends State<LifeCycle> {
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
-            label: 'Home',
-          ),
+            label: 'Home',),
           BottomNavigationBarItem(
             icon: Icon(Icons.info),
-            label: 'Info',
-          ),
+            label: 'Info',),
         ],
       ),
     );
@@ -106,6 +131,7 @@ class _LifeCycleExampleState extends State<LifeCycle> {
   @override
   void dispose() {
     print('dispose called');
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 }
