@@ -1,189 +1,253 @@
 import 'package:flutter/material.dart';
-class Lifecycle extends StatefulWidget {
+class LifeCyclePage extends StatefulWidget {
   final String title;
 
-  const Lifecycle({Key? key, required this.title}) : super(key: key);
+  LifeCyclePage({Key? key, required this.title}) : super(key: key);
 
   @override
-  State<Lifecycle> createState() => _LifecycleMainScreenState();
+  _LifeCyclePageState createState() {
+    print('createState triggered');
+    return _LifeCyclePageState();
+  }
 }
 
-class _LifecycleMainScreenState extends State<Lifecycle> with WidgetsBindingObserver {
-  int _tapCount = 0;
-  String status = "App is running";
-  int selectedIndex = 0;
+class _LifeCyclePageState extends State<LifeCyclePage> with WidgetsBindingObserver,SingleTickerProviderStateMixin {
+  int _counter = 0;
+  int _selectedIndex = 0;
+  String _appState = "App started";
+  late TabController _tabController;
+  String _gender = 'Male';
 
   @override
   void initState() {
     super.initState();
-    print("initState called");
+    _tabController = TabController(length: 4, vsync: this);
+    print('initState called');
     WidgetsBinding.instance.addObserver(this);
-    status = "App initialized";
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    print("didChangeDependencies called");
+    print('didChangeDependencies called');
   }
 
   @override
-  void didUpdateWidget(covariant Lifecycle oldWidget) {
+  void didUpdateWidget(covariant LifeCyclePage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    print("didUpdateWidget called");
+    print('didUpdateWidget called');
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    print("AppLifecycleState changed to $state");
-
     setState(() {
-      if (state == AppLifecycleState.resumed) {
-        status = "App is in RESUMED state";
-      } else if (state == AppLifecycleState.inactive) {
-        status = "App is in INACTIVE state";
-      } else if (state == AppLifecycleState.paused) {
-        status = "App is in PAUSED state";
-      } else if (state == AppLifecycleState.detached) {
-        status = "App is in DETACHED state";
+      switch (state) {
+        case AppLifecycleState.resumed:
+          print('app resumed');
+          break;
+        case AppLifecycleState.paused:
+          print('app paused');
+          break;
+        case AppLifecycleState.inactive:
+          print('app inactive');
+          break;
+        case AppLifecycleState.detached:
+        default:
+          print('app detached');
+          break;
       }
     });
+    print('AppLifecycleState changed to: $state');
   }
 
-  @override
-  void dispose() {
-    print("dispose called");
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-
-  void showBottomSheet() {
-    showModalBottomSheet(
-        context: context,
-        builder: (ctx) {
-          return Container(
-            padding: EdgeInsets.all(16),
-            height: 150,
-            width: 400,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text("This is a bottom sheet"),
-              ],
-            ),
-          );
-        });
-  }
-
-
-
-  void  _showDialog() {
-    showDialog(
-        context: context,
-        builder: (ctx) {
-          return AlertDialog(
-            title: Text("Status Of the App"),
-            content: Text(status),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(ctx).pop();
-                },
-                child: Text("OK"),
-              )
-            ],
-          );
-        });
-  }
-
-  void showSnackBar() {
+  void _incrementCounter() {
+    setState(() {
+      _counter++;
+    });
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text("You tapped $_tapCount times."),
-      duration: Duration(seconds: 2),
+      content: Text('Counter increased to $_counter'),
+      duration: Duration(seconds: 1),
     ));
   }
 
-  Widget BCard() {
-    return Card(
-      color: Colors.greenAccent,
-      margin: EdgeInsets.symmetric(horizontal: 16),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      elevation: 4,
-      child: Container(
-        padding: EdgeInsets.all(16),
-        width: double.infinity,
-        child: Column(
-          children: [
-            Text("App LifeCycle", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-            SizedBox(height: 8),
-            Text(status, style: TextStyle(color: Colors.deepPurple)),],
-        ),
-      ),
-    );
-  }
-
-  void _onItemTapped(int index) {
+  void _onNavTapped(int index) {
     setState(() {
-      selectedIndex = index;
-
-      if (index == 1) {
-        _showDialog();
-      } else if (index == 2) {
-        showBottomSheet();
-      }
+      _selectedIndex = index;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    print("build method called");
+    print('build method called');
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.grey,
-        title: Text('App lifeCycle'),
-        actions: [
-          IconButton(
-              onPressed: showSnackBar,
-              icon: Icon(Icons.info_outline), tooltip: 'Show SnackBar')
-        ],
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            SizedBox(height: 20),
-            BCard(),
-            SizedBox(height: 20),
-            Image.asset("assets/images/fast food.jpg", width: 200, height: 150, fit: BoxFit.cover,),
-            SizedBox(height: 20),
-            Text("Tap Counter: $_tapCount", style: TextStyle(fontSize: 20, color: Colors.black)),
-            SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  _tapCount++;
-                  print("Tap button pressed: $_tapCount");
-                });
-              },
-              child: Text("Click me"),
-              style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12),
-                  backgroundColor: Colors.cyan),
-            ),
+        title: Text(widget.title),
+        backgroundColor: Colors.blueGrey,
+        bottom: TabBar(
+          indicatorSize: TabBarIndicatorSize.tab,
+          indicatorAnimation: TabIndicatorAnimation.elastic,
+          controller: _tabController,
+          tabs: [
+            Tab(text: "Home"),
+            Tab(text: "Orders"),
+            Tab(text: "Favourite"),
+            Tab(text: "Profile"),
           ],
         ),
       ),
+      drawer: Drawer(
+        child: ListView(
+          children: [
+            DrawerHeader(
+              decoration: BoxDecoration(color: Colors.indigo),
+              child: Text("MENU", style: TextStyle(color: Colors.white, fontSize: 20)),
+            ),
+            ListTile(
+              title: Text("Click here"),
+              onTap: () {
+                Navigator.pop(context);
+                showDialog(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: Text("Here is a Alert Box"),
+                    content: Text("Hello foodie"),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx),
+                        child: Text("OK"),
+                      )
+                    ],
+                  ),
+                );},
+            )],
+        ),),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+         Center(
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text("Lifecycle Status: $_appState", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                SizedBox(height: 10),
+                Card(
+                  elevation: 4,
+                  margin: EdgeInsets.all(20),
+                  child: Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        Text("You clicked $_counter times.", style: TextStyle(fontSize: 18)),
+                        SizedBox(height: 12),
+                        Image.asset("assets/images/fast food.jpg", height: 180, fit: BoxFit.cover),
+                        SizedBox(height: 12),
+                        ElevatedButton(
+                          onPressed: _incrementCounter,
+                          child: Text("Click here",style: TextStyle(color: Colors.blueGrey),),
+
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ),
+        ),
+        Card(
+        color: Colors.greenAccent.shade100,
+        margin: EdgeInsets.all(16),
+        elevation: 5,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        child: Padding(
+        padding: EdgeInsets.all(16),
+        child: Column(
+
+        children: [
+
+
+        ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Image.asset(
+        'assets/images/fast food.jpg',
+        height: 300,
+        width: double.infinity,
+        fit: BoxFit.cover,
+        ),
+        ),
+    SizedBox(height: 16),
+
+    Text(
+    "Pizza Order Details",
+    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+    ),
+    SizedBox(height: 12),
+
+
+    Align(
+    alignment: Alignment.centerLeft,
+    child: Text("Select Gender:", style: TextStyle(fontWeight: FontWeight.bold)),
+    ),
+    Row(
+    children: [
+    Radio<String>(
+    value: "Male",
+    groupValue: _gender,
+    onChanged: (val) {
+    setState(() {
+    _gender = val!;
+    });
+    },
+    ),
+    Text("Male"),
+    Radio<String>(
+    value: "Female",
+    groupValue: _gender,
+    onChanged: (val) {
+    setState(() {
+    _gender = val!;
+    });
+    },
+    ),
+    Text("Female"),
+    ],
+    ),
+    ],),),),
+         CircleAvatar(
+           radius: 6,
+           child: Text("Hello Foodie",style: TextStyle(fontSize: 30,fontWeight: FontWeight.bold,color: Colors.white),),
+           backgroundColor: Colors.brown,
+         ),
+          Center(child: Text('Hello'),)
+          
+
+        ]
+      ),
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: selectedIndex,
-        selectedItemColor: Colors.deepPurple,
+        currentIndex: _selectedIndex,
+        onTap: _onNavTapped,
+        selectedItemColor: Colors.indigo,
         unselectedItemColor: Colors.grey,
-        onTap: _onItemTapped,
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.message), label: 'Message'),
-          BottomNavigationBarItem(icon: Icon(Icons.info), label: 'Sheet'),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+          BottomNavigationBarItem(icon: Icon(Icons.info), label: "Info"),
         ],
       ),
     );
+  }
+
+  @override
+  void deactivate() {
+    super.deactivate();
+    print('deactivate called');
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    print('dispose called');
+    super.dispose();
   }
 }
